@@ -1,8 +1,14 @@
 package xyz.panyi.imserver;
 
 public class Main {
-    public static void main(String[] args){
-        System.out.println("I am ImServer");
 
+    /**
+     *  启动服务
+     * @param args
+     */
+    public static void main(String[] args){
+        ImServer server = new ImServer(Config.IM_SERVER_PORT);
+        server.runLoop();
     }
+
 }//end class
