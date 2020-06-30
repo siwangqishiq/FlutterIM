@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imclient/core/NetClient.dart';
+import 'package:imclient/page/pages.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: '客户端'),
+      //home: MyHomePage(title: '客户端'),
+      home: WebSocketRoute(),
     );
   }
 }
