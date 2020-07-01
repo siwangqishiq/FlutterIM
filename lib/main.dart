@@ -1,9 +1,26 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:imclient/core/NetClient.dart';
 import 'package:imclient/page/pages.dart';
+import 'dart:convert' show utf8;
+import 'model/Person.dart';
 
-void main() {
-  runApp(MyApp());
+void main() =>runApp(MyApp());
+
+void testUnit(){
+  print("init app");
+
+  String str ="毛利兰";
+  Uint8List strUintList = utf8.encode(str);
+  print("strUintList : $strUintList");
+  print("strUintList decode : ${utf8.decode(strUintList)}");
+  Person p = new Person(name:str);
+  Uint8List pData = p.encode();
+  print("pData : $pData");
+
+  Person decodePerson = Person.build(pData);
+  print("decodePerson  ${decodePerson.name}  ${decodePerson.age} ${decodePerson.desc}");
 }
 
 class MyApp extends StatelessWidget {
