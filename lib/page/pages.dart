@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:imclient/core/NetClient.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/bytebuf.dart';
-
 import 'SessionPage.dart';
 
 
@@ -20,7 +19,7 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
     WidgetsBinding.instance.addObserver(this);
     NetClient.getInstance().init();
 
-    content = "<>";
+    content = "[]";
 
     NetClient.getInstance().addListener(this);
   }
