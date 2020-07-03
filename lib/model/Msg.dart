@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:imclient/model/Codec.dart';
@@ -7,6 +8,23 @@ class Msg extends Codec {
   int length;
   int code;
   Uint8List data;
+
+  Msg();
+
+  static Msg buildMsg(int code, Codec data){
+    Msg msg = new Msg();
+    msg.code = code;
+    msg.length = 8; 
+    if(data != null){
+      Uint8List dataBytes = data.encode();
+      msg.data = dataBytes;
+            
+      if(msg.data != null){
+        msg.length += msg.data.length;
+      }
+    }
+    return msg;
+  }
 
   @override
   void decode(Uint8List rawData) {

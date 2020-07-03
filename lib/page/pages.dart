@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imclient/core/NetClient.dart';
+import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'SessionPage.dart';
@@ -17,11 +17,11 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    NetClient.getInstance().init();
+    IMClient.getInstance().init();
 
     content = "[]";
 
-    NetClient.getInstance().addListener(this);
+    IMClient.getInstance().addListener(this);
   }
 
   @override
@@ -29,7 +29,7 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
     print(state);
     if(state == AppLifecycleState.detached){
       print("page dispose()");
-      NetClient.getInstance().dispose();
+      IMClient.getInstance().dispose();
     }
   }
 
@@ -55,7 +55,7 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
 
   @override
   void dispose() {
-    NetClient.getInstance().removeListener(this);
+    IMClient.getInstance().removeListener(this);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

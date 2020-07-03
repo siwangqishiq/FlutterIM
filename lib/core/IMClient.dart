@@ -10,19 +10,32 @@ abstract class MsgCallback{
   void onReceivedMsg(Msg msg);
 }
 
-class NetClient{
-  static NetClient instance;
+enum NetStatus{
+  offline, //初始 离线状态
+  connecting, //连接中 
+  online //在线
+}
+
+class IMClient{
+  static IMClient instance;
 
   Socket _socket;
+  NetStatus  _netStatus;
 
   List<MsgCallback> callbackList = [];
+  
+  List<Msg> _waitSendMsgs = [];
 
-  static NetClient getInstance(){
+  static IMClient getInstance(){
     if(instance == null){
-      instance = new NetClient();
+      instance = new IMClient();
     }
 
     return instance;
+  }
+
+  IMClient(){
+    _netStatus = NetStatus.offline;
   }
 
   void init(){
@@ -45,14 +58,27 @@ class NetClient{
   }
 
   void connectServer(){
+    if(_netStatus == NetStatus.online || _netStatus == NetStatus.connecting){
+      print("connect server cancel");
+      return;
+    }
+
     //print("im netclient init");
     Socket.connect(ServerConfig.instance.imServer , ServerConfig.instance.imPort , timeout: Duration(milliseconds: 30*1000))
     .then((socket){
       print("connect success! ${socket.address} : ${socket.port} => ${socket.remoteAddress} : ${socket.remotePort}");
       _socket = socket;
+      _netStatus = NetStatus.online;
       addSocketListener();
+
+      // 
+      while(_waitSendMsgs.isNotEmpty){
+        Msg msg = _waitSendMsgs.removeAt(0);
+        sendMsg(msg);
+      }
     })
     .catchError((e){
+      _netStatus = NetStatus.offline;
       print("连接发生错误 connect error ${e.toString()}");
     });
   }
@@ -72,6 +98,8 @@ class NetClient{
         
         print("msg : length = ${msg.length} code = ${msg.code} ");  
         print("content = ${ByteBufUtil.readString(msg.data)}");     
+        
+        _handleMsg(msg);
 
         for(MsgCallback callback in callbackList){
           callback.onReceivedMsg(msg);
@@ -79,6 +107,7 @@ class NetClient{
       },
       onDone: (){
         print("on close socket");
+        closeSocket();
       },
       onError: (e){
         print("onError : ${e.toString()}");
@@ -87,11 +116,30 @@ class NetClient{
     );
   }
 
-  void sendMsg(){
-    if(_socket == null)
-      return;
+  void closeSocket(){
+    _netStatus = NetStatus.offline;
+  }
 
+  void _handleMsg(Msg msg){
+
+  }
+
+  // 发送Msg消息
+  void sendMsg(Msg msg){
     
+    if(_netStatus == NetStatus.online){
+      print("send msg : ${msg.code} ${msg.length} ${msg.data}");
+      var sendBytes = msg.encode();
+      print("sendBytes : $sendBytes");
+      //_socket.write(sendBytes);
+      _socket.add(sendBytes);
+      _socket.flush();
+    }else if(_netStatus == NetStatus.connecting){
+      _waitSendMsgs.add(msg);
+    }else if(_netStatus == NetStatus.offline){
+      _waitSendMsgs.add(msg);
+      connectServer();
+    }
   }
 
   void dispose(){
@@ -100,6 +148,7 @@ class NetClient{
       _socket.close().then((r){
         print("close socket success");
         _socket = null;
+        _netStatus = NetStatus.offline;
       }).catchError((e){
         print("close socket error ${e.toString()}");
       });

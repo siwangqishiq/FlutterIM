@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:imclient/core/NetClient.dart';
+import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/page/LoginPage.dart';
 import 'package:imclient/page/pages.dart';
 import 'dart:convert' show utf8;
@@ -10,7 +10,7 @@ import 'model/Person.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //确保flutter环境已经完全启动  否则后面会报错
-
+  
   appInit();
   runApp(MyApp());
 }
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    NetClient.getInstance().init();
+    IMClient.getInstance().init();
   }
 
   @override

@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:imclient/core/NetClient.dart';
+import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/model/Bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
 
@@ -15,7 +15,7 @@ class SessionPageState extends State<SessionPage> with MsgCallback {
   @override
   void initState() {
     super.initState();
-    NetClient.getInstance().addListener(this);
+    IMClient.getInstance().addListener(this);
   }
 
   @override
@@ -36,7 +36,7 @@ class SessionPageState extends State<SessionPage> with MsgCallback {
   @override
   void dispose() {
     print("session page dispose");
-    NetClient.getInstance().removeListener(this);
+    IMClient.getInstance().removeListener(this);
     super.dispose();
   }
 
