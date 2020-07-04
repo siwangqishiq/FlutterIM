@@ -2,6 +2,27 @@
 import 'dart:typed_data';
 import 'package:imclient/model/Codec.dart';
 
+class PesonResp extends Codec{
+  String content;
+  num time;
+
+  @override
+  Uint8List encode() {
+    List<Uint8List> result = [];
+    result.add(writeString(content));
+    result.add(writeInt64(time));
+    return Uint8List.fromList(result.expand((x)=>x).toList());
+  }
+
+  @override
+  void decode(Uint8List rawData) {
+    resetReadIndex();
+    
+    content = readString(rawData);
+    time = readInt64(rawData);
+  }
+}
+
 class Person extends Codec{
   String name;
   int age;
@@ -28,12 +49,8 @@ class Person extends Codec{
   void decode(Uint8List rawData) {
     resetReadIndex();
 
-    print("1");
     name = readString(rawData);
-    print("2");
     age = readInt32(rawData);
-    print("3");
     desc = readString(rawData);
-    print("4");
   }
 }//end class

@@ -9,7 +9,7 @@ class SessionPage extends StatefulWidget{
   State<StatefulWidget> createState() => SessionPageState();
 }
 
-class SessionPageState extends State<SessionPage> with MsgCallback {
+class SessionPageState extends State<SessionPage> with ClientCallback {
   String _content = "UnSet";
 
   @override
@@ -46,6 +46,11 @@ class SessionPageState extends State<SessionPage> with MsgCallback {
     setState(() {
      _content = str; 
     });
+  }
+
+  @override
+  void onNetStatusChange(NetStatus oldStatus, NetStatus newStatus) {
+    
   }
 
 }//end class

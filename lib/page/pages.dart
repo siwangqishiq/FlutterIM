@@ -10,7 +10,9 @@ class WebSocketRoute extends StatefulWidget{
   State<StatefulWidget> createState() => _WebSocketRouteState();
 }
 
-class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObserver , MsgCallback {
+class _WebSocketRouteState extends State<WebSocketRoute>  
+      with WidgetsBindingObserver , ClientCallback {
+  String netStatusShow;
   String content;
 
   @override
@@ -37,7 +39,7 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hello"),
+        title: Text(netStatusShow),
       ),
       body: Center(
         child: Text(content),
@@ -67,5 +69,13 @@ class _WebSocketRouteState extends State<WebSocketRoute>  with WidgetsBindingObs
       content = str;
     });
     //print("received msg ${msg.code}");
+  }
+
+  @override
+  void onNetStatusChange(NetStatus oldStatus, NetStatus newStatus) {
+    String content = null;
+    if(newStatus == NetStatus){
+      
+    }
   }
 }//end class

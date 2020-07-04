@@ -6,8 +6,12 @@ import 'package:imclient/model/Msg.dart';
 
 //typedef OnMsgCallback = bool Function(Msg msg);
 
-abstract class MsgCallback{
+abstract class ClientCallback{
+  //受到消息
   void onReceivedMsg(Msg msg);
+
+  //网络状态改变
+  void onNetStatusChange(NetStatus oldStatus , NetStatus newStatus);
 }
 
 enum NetStatus{
@@ -22,7 +26,7 @@ class IMClient{
   Socket _socket;
   NetStatus  _netStatus;
 
-  List<MsgCallback> callbackList = [];
+  List<ClientCallback> callbackList = [];
   
   List<Msg> _waitSendMsgs = [];
 
@@ -43,7 +47,7 @@ class IMClient{
   }
 
   //添加事件监听
-  bool addListener(MsgCallback cb){
+  bool addListener(ClientCallback cb){
     if(callbackList.contains(cb)){
       return false;
     }
@@ -53,7 +57,7 @@ class IMClient{
   }
 
   //移除事件监听
-  bool removeListener(MsgCallback cb){
+  bool removeListener(ClientCallback cb){
     return callbackList.remove(cb);
   }
 
@@ -64,11 +68,13 @@ class IMClient{
     }
 
     //print("im netclient init");
+    _switchStatus(_netStatus, NetStatus.connecting);
+
     Socket.connect(ServerConfig.instance.imServer , ServerConfig.instance.imPort , timeout: Duration(milliseconds: 30*1000))
     .then((socket){
       print("connect success! ${socket.address} : ${socket.port} => ${socket.remoteAddress} : ${socket.remotePort}");
       _socket = socket;
-      _netStatus = NetStatus.online;
+      _switchStatus(_netStatus, NetStatus.online);
       addSocketListener();
 
       // 
@@ -78,7 +84,11 @@ class IMClient{
       }
     })
     .catchError((e){
-      _netStatus = NetStatus.offline;
+      _switchStatus(_netStatus, NetStatus.offline);
+      
+      if(_socket != null){
+        _socket.close();
+      }
       print("连接发生错误 connect error ${e.toString()}");
     });
   }
@@ -96,12 +106,12 @@ class IMClient{
         if(msg == null)
           return;
         
-        print("msg : length = ${msg.length} code = ${msg.code} ");  
-        print("content = ${ByteBufUtil.readString(msg.data)}");     
+        print("received msg : length = ${msg.length} code = ${msg.code} ");  
+        //print("content = ${msg.data}");     
         
         _handleMsg(msg);
 
-        for(MsgCallback callback in callbackList){
+        for(ClientCallback callback in callbackList){
           callback.onReceivedMsg(msg);
         }
       },
@@ -111,6 +121,7 @@ class IMClient{
       },
       onError: (e){
         print("onError : ${e.toString()}");
+        _switchStatus(_netStatus, NetStatus.offline);
       },  
       cancelOnError: false,
     );
@@ -121,16 +132,15 @@ class IMClient{
   }
 
   void _handleMsg(Msg msg){
-
+    
   }
 
   // 发送Msg消息
   void sendMsg(Msg msg){
-    
     if(_netStatus == NetStatus.online){
-      print("send msg : ${msg.code} ${msg.length} ${msg.data}");
+      // print("send msg : ${msg.code} ${msg.length} ${msg.data}");
       var sendBytes = msg.encode();
-      print("sendBytes : $sendBytes");
+      // print("sendBytes : $sendBytes");
       //_socket.write(sendBytes);
       _socket.add(sendBytes);
       _socket.flush();
@@ -148,10 +158,22 @@ class IMClient{
       _socket.close().then((r){
         print("close socket success");
         _socket = null;
-        _netStatus = NetStatus.offline;
+        _switchStatus(_netStatus , NetStatus.offline);
       }).catchError((e){
         print("close socket error ${e.toString()}");
       });
+    }
+  }
+
+  void _switchStatus(NetStatus oldStatus , NetStatus newStatus){
+    print("oldStatus: $oldStatus  newStatus: $newStatus");
+    if(_netStatus != newStatus){
+      _netStatus = newStatus;
+      
+      //callback
+      for(ClientCallback cb in callbackList){
+        cb.onNetStatusChange(oldStatus, newStatus);
+      }//end for each
     }
   }
   

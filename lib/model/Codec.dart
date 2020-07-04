@@ -22,6 +22,12 @@ abstract class Codec {
     return data.buffer.asUint8List();
   }
 
+  Uint8List writeInt64(int value){
+    ByteData data = ByteData(8);
+    data.setInt64(0, value , Endian.little);
+    return data.buffer.asUint8List();
+  }
+
   //
   Uint8List writeString(String str){
     if(str == null || str.isEmpty){
@@ -43,11 +49,18 @@ abstract class Codec {
     return result;
   }
 
+  num readInt64(Uint8List bytes){
+    num result = bytes.sublist(_readIndex).buffer.asInt64List()[0];
+    return result;
+  }
+
   String readString(Uint8List bytes){
+    print("readString $bytes");
     int len = bytes.sublist(_readIndex).buffer.asInt32List()[0];
     print("$_readIndex len = $len");
     String readString = utf8.decode(bytes.sublist(_readIndex + 4 , _readIndex + 4 + len));
     _readIndex += (4 + len); //string 长度 + 数据长度
+
     return readString;
   }
 }//end class
