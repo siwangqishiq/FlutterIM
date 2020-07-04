@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> with ClientCallback{
 
   //输入内容改变  联动修改提交按钮状态
   void _onInputTextChange(){
-    print("accout = $_account  pwd = $_pwd");
+    //print("accout = $_account  pwd = $_pwd");
     bool enbaleSubmit = !TextUtil.isEmpty(_account) && !TextUtil.isEmpty(_pwd);
 
     if(enbaleSubmit != _loginBtnEnable){
@@ -106,7 +106,8 @@ class _LoginPageState extends State<LoginPage> with ClientCallback{
 
   //点击登录按钮
   void _onClickLoginButton(){
-
+    print("accout = $_account  pwd = $_pwd");
+    IMClient.getInstance().auth(_account , _pwd);
   }
 
   @override

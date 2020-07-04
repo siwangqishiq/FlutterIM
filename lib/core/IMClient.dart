@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:imclient/env/ServerConfig.dart';
+import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
+import 'package:imclient/model/Login.dart';
 
 //typedef OnMsgCallback = bool Function(Msg msg);
 
@@ -12,6 +14,10 @@ abstract class ClientCallback{
 
   //网络状态改变
   void onNetStatusChange(NetStatus oldStatus , NetStatus newStatus);
+}
+
+abstract class AuthCallback{
+  void onAuthResult(int resultCode, String token);
 }
 
 enum NetStatus{
@@ -27,6 +33,8 @@ class IMClient{
   NetStatus  _netStatus;
 
   List<ClientCallback> callbackList = [];
+
+  AuthCallback _authCallback;
   
   List<Msg> _waitSendMsgs = [];
 
@@ -44,6 +52,12 @@ class IMClient{
 
   void init(){
     connectServer();
+  }
+
+  void addAuthCallback(AuthCallback authCb){
+    if(_authCallback != authCb){
+      _authCallback = authCb;
+    }
   }
 
   //添加事件监听
@@ -175,6 +189,19 @@ class IMClient{
         cb.onNetStatusChange(oldStatus, newStatus);
       }//end for each
     }
+  }
+
+  void _sendModel(Codec model){
+    Msg msg = Msg.buildMsg(model.getCode() ,model);
+    sendMsg(msg);
+  }
+
+  void auth(String account , String password){
+    LoginReq loginReq = new LoginReq();
+    loginReq.account = account;
+    loginReq.password = password;
+    
+    _sendModel(loginReq);
   }
   
 }//end class

@@ -10,6 +10,10 @@ abstract class Codec {
   //字节流转为对象
   void decode(Uint8List rawData);
 
+  int getCode(){
+    return 0;
+  }
+
   //重置已读索引
   void resetReadIndex(){
     _readIndex = 0;
