@@ -31,8 +31,13 @@ class LoginReq extends Codec{
 }
 
 class LoginResp extends Codec {
+  static const int RESULT_CODE_SUCCESS = 1;
+  static const int RESULT_CODE_ERROR = -1;
+
   int resultCode;
   String token;
+  String account;
+  int uid;
 
   @override
   void decode(Uint8List rawData) {
@@ -40,6 +45,8 @@ class LoginResp extends Codec {
     
     resultCode = readInt32(rawData);
     token = readString(rawData);
+    account = readString(rawData);
+    uid = readInt64(rawData);
   }
 
   @override
@@ -48,6 +55,8 @@ class LoginResp extends Codec {
 
     result.add(writeInt32(resultCode));
     result.add(writeString(token));
+    result.add(writeString(account));
+    result.add(writeInt64(uid));
     
     return Uint8List.fromList(result.expand((x)=>x).toList());
   }

@@ -4,7 +4,9 @@ import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/Person.dart';
 import 'package:imclient/core/Codes.dart';
+import 'package:imclient/page/MainPage.dart';
 import 'package:imclient/util/TextUtil.dart';
+import 'package:fluttertoast/fluttertoast.dart'; 
 
 //
 class LoginPage extends StatefulWidget{
@@ -13,7 +15,7 @@ class LoginPage extends StatefulWidget{
 }
 
 //
-class _LoginPageState extends State<LoginPage> with ClientCallback{
+class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallback{
   String _statusContent = "未连接";
 
   String _account;
@@ -25,12 +27,14 @@ class _LoginPageState extends State<LoginPage> with ClientCallback{
   void initState(){
     super.initState();
     IMClient.getInstance().addListener(this);
+    IMClient.getInstance().addAuthCallback(this);
   }
 
   @override
   void dispose(){
-    super.dispose();
     IMClient.getInstance().removeListener(this);
+    IMClient.getInstance().clearAuthCallback();
+    super.dispose();
   }
 
   @override
@@ -142,6 +146,26 @@ class _LoginPageState extends State<LoginPage> with ClientCallback{
       String info = "${t.toLocal().toString()}   ${pesonResp.content}";
       print("$info");
     }
+  }
+
+  void _skipToMain() async{
+    await Navigator.of(context).pop();
+
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext context) => MainPage()
+    ));
+  }
+
+  @override
+  void onAuthError(int errorCode) {
+    print("login Error code = $errorCode");
+    FlutterToast.showToast(msg: "用户名或密码错误");
+  }
+
+  @override
+  void onAuthSuccess(String token, String account, int uid) {
+    print("success login! token = $token , accout = $account uid=$uid");
+    _skipToMain();
   }
 
 }//

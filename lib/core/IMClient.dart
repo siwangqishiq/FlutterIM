@@ -5,6 +5,8 @@ import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/Login.dart';
+import 'package:imclient/core/Codes.dart';
+import 'package:imclient/core/Account.dart';
 
 //typedef OnMsgCallback = bool Function(Msg msg);
 
@@ -17,7 +19,11 @@ abstract class ClientCallback{
 }
 
 abstract class AuthCallback{
-  void onAuthResult(int resultCode, String token);
+  //验证登录成功
+  void onAuthSuccess(String token , String account , int uid);
+
+  //登录失败
+  void onAuthError(int errorCode);
 }
 
 enum NetStatus{
@@ -58,6 +64,10 @@ class IMClient{
     if(_authCallback != authCb){
       _authCallback = authCb;
     }
+  }
+
+  void clearAuthCallback(){
+    _authCallback = null;
   }
 
   //添加事件监听
@@ -146,7 +156,32 @@ class IMClient{
   }
 
   void _handleMsg(Msg msg){
-    
+    switch(msg.code){
+      case Codes.CODE_LOGIN_RESP://登录响应
+        LoginResp loginResp = new LoginResp();
+        loginResp.decode(msg.data);
+        
+        _handleLogin(loginResp);
+        break;
+    }
+  }
+
+  void _handleLogin(LoginResp loginResp){
+    if(loginResp == null)
+      return;
+
+    if(loginResp.resultCode == LoginResp.RESULT_CODE_SUCCESS){
+      Account.setUserInfo(loginResp.token, loginResp.account, loginResp.uid);
+
+      if(_authCallback != null){
+        _authCallback.onAuthSuccess(loginResp.token, loginResp.account, loginResp.uid);
+        clearAuthCallback();
+      }
+    }else{//登录失败
+      if(_authCallback != null){
+        _authCallback.onAuthError(loginResp.resultCode);
+      }
+    }
   }
 
   // 发送Msg消息
