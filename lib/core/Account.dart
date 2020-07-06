@@ -17,6 +17,10 @@ class Account {
     _token = prefs.getString(_KEY_TOKEN);
     _account = prefs.getString(_KEY_ACCOUNT);
     _uid = prefs.getInt(_KEY_UID);
+
+    print("token : $_token");
+    print("account : $_account");
+    print("uid : $_uid");
   }
 
   static void setUserInfo(String token , String account , int uid) async {
