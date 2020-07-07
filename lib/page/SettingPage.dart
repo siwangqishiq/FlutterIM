@@ -22,14 +22,9 @@ class SettingPageState extends BaseState<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(
-          _content,
-          style: TextStyle(
-            fontSize: 40,
-            color: Colors.black,
-          ),
-        ),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: null,
       ),
     );
   }
