@@ -1,19 +1,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:imclient/core/IMClient.dart';
-import 'package:imclient/model/Bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/page/BaseState.dart';
 
-class SessionPage extends StatefulWidget{
+class ContactsPage extends StatefulWidget{
   @override
-  State<StatefulWidget> createState() => SessionPageState();
+  State<StatefulWidget> createState() => ContactsPageState();
 }
 
-class SessionPageState extends BaseState<SessionPage> {
-  static const int TAB_INDEX_SESSION =0;
+class ContactsPageState extends BaseState<ContactsPage> {
+  static const int TAB_INDEX_CONTACT =1;
 
-  String _content = "会话";
+  String _content = "好友";
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +35,17 @@ class SessionPageState extends BaseState<SessionPage> {
   }
 
   @override
-  void onReceivedMsg(Msg msg) {
+  void dispose() {
+    super.dispose();
+  }
 
+  @override
+  void onReceivedMsg(Msg msg) {
+    
   }
 
   @override
   void onNetStatusChange(NetStatus oldStatus, NetStatus newStatus) {
     
   }
-
 }//end class

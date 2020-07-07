@@ -38,6 +38,7 @@ class LoginResp extends Codec {
   String token;
   String account;
   int uid;
+  String avator;
 
   @override
   void decode(Uint8List rawData) {
@@ -47,6 +48,7 @@ class LoginResp extends Codec {
     token = readString(rawData);
     account = readString(rawData);
     uid = readInt64(rawData);
+    avator = readString(rawData);
   }
 
   @override
@@ -57,7 +59,13 @@ class LoginResp extends Codec {
     result.add(writeString(token));
     result.add(writeString(account));
     result.add(writeInt64(uid));
+    result.add(writeString(avator));
     
     return Uint8List.fromList(result.expand((x)=>x).toList());
+  }
+
+  @override
+  int getCode(){
+    return Codes.CODE_LOGIN_RESP;
   }
 }
