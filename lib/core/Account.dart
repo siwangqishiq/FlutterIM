@@ -7,11 +7,13 @@ class Account {
   static const String _KEY_ACCOUNT = "account";
   static const String _KEY_UID = "_uid";
   static const String _KEY_AVATOR = "_avator";
+  static const String _KEY_NAME = "_name";
 
   static String _token;
   static String _account;
   static int _uid;
   static String _avator;
+  static String name;
 
   //
   static Future loadAccount() async{
@@ -20,35 +22,51 @@ class Account {
     _account = prefs.getString(_KEY_ACCOUNT);
     _uid = prefs.getInt(_KEY_UID);
     _avator = prefs.getString(_KEY_AVATOR);
-
-    print("token : $_token");
-    print("account : $_account");
-    print("uid : $_uid");
-    print("avator : $_avator");
+    name = prefs.getString(_KEY_NAME);
+//    print("token : $_token");
+//    print("account : $_account");
+//    print("uid : $_uid");
+//    print("avator : $_avator");
   }
 
-  static void setUserInfo(String token , String account , int uid , String avator) async {
+  static void setUserInfo(String token , String account , int uid , String avator , String displayName) async {
     _token = token;
     _account = account;
     _uid = uid;
     _avator = avator;
+    name = displayName;
 
+    _infoDao();
+  }
+
+  static void clearUserInfo() async{
+    _token = null;
+    _account = null;
+    _uid = 0;
+    _avator = null;
+    name = null;
+
+    _infoDao();
+  }
+
+  static void _infoDao() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(_KEY_TOKEN, _token);
     prefs.setString(_KEY_ACCOUNT, _account);
     prefs.setInt(_KEY_UID, _uid);
     prefs.setString(_KEY_AVATOR, _avator);
+    prefs.setString(_KEY_NAME, name);
   }
 
-  String getToken(){
+  static String getToken(){
     return _token;
   }
 
-  int getUid(){
+  static int getUid(){
     return _uid;
   }
 
-  String getAvator(){
+  static String getAvator(){
     return _avator;
   }
 

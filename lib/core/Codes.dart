@@ -5,4 +5,7 @@ class Codes{
   
   static const int CODE_LOGIN_REQ = 1003;//登录请求
   static const int CODE_LOGIN_RESP = 1004;//登录响应
+
+  static const int CODE_LOGIN_OUT_REQ  =1005;//注销登录req
+  static const int CODE_LOGIN_OUT_RESP = 1006;//注销登录 resp
 }

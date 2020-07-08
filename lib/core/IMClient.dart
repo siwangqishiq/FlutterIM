@@ -26,6 +26,13 @@ abstract class AuthCallback{
   void onAuthError(int errorCode);
 }
 
+//注销登录回调
+abstract class LoginOutCallback{
+  void loginOutSuccess();
+
+  void loginOutError();
+}
+
 enum NetStatus{
   offline, //初始 离线状态
   connecting, //连接中 
@@ -39,8 +46,8 @@ class IMClient{
   NetStatus  _netStatus;
 
   List<ClientCallback> callbackList = [];
-
   AuthCallback _authCallback;
+  LoginOutCallback _loginOutCallback;
   
   List<Msg> _waitSendMsgs = [];
 
@@ -68,6 +75,16 @@ class IMClient{
 
   void clearAuthCallback(){
     _authCallback = null;
+  }
+
+  void addLoginOutCallback(LoginOutCallback cb){
+    if(_loginOutCallback != cb){
+        _loginOutCallback = cb;
+    }
+  }
+
+  void clearLoginOutCallback(){
+    _loginOutCallback = null;
   }
 
   //添加事件监听
@@ -155,23 +172,14 @@ class IMClient{
     _netStatus = NetStatus.offline;
   }
 
-  void _handleMsg(Msg msg){
-    switch(msg.code){
-      case Codes.CODE_LOGIN_RESP://登录响应
-        LoginResp loginResp = new LoginResp();
-        loginResp.decode(msg.data);
-        
-        _handleLogin(loginResp);
-        break;
-    }
-  }
+
 
   void _handleLogin(LoginResp loginResp){
     if(loginResp == null)
       return;
 
     if(loginResp.resultCode == LoginResp.RESULT_CODE_SUCCESS){
-      Account.setUserInfo(loginResp.token, loginResp.account, loginResp.uid);
+      Account.setUserInfo(loginResp.token, loginResp.account, loginResp.uid , loginResp.avator , loginResp.name);
 
       if(_authCallback != null){
         _authCallback.onAuthSuccess(loginResp.token, loginResp.account, loginResp.uid);
@@ -231,6 +239,7 @@ class IMClient{
     sendMsg(msg);
   }
 
+  //用户名密码手动登录
   void auth(String account , String password){
     LoginReq loginReq = new LoginReq();
     loginReq.account = account;
@@ -238,5 +247,43 @@ class IMClient{
     
     _sendModel(loginReq);
   }
-  
+
+  //注销登录
+  void loginOut(){
+    LoginOutReq loginOutReq = new LoginOutReq(Account.getUid());
+    _sendModel(loginOutReq);
+  }
+
+  //注销登录响应
+  void _handleLoginOutResp(Msg msg){
+    LoginOutResp resp = new LoginOutResp();
+    resp.decode(msg.data);
+
+    if(resp.resultCode == Codec.RESULT_CODE_SUCCESS){
+      Account.clearUserInfo();
+      if(_loginOutCallback != null){
+        _loginOutCallback.loginOutSuccess();
+      }
+    }else{
+      if(_loginOutCallback != null){
+        _loginOutCallback.loginOutError();
+      }
+    }
+  }
+
+  void _handleMsg(Msg msg){
+    switch(msg.code){
+      case Codes.CODE_LOGIN_RESP://登录响应
+        LoginResp loginResp = new LoginResp();
+        loginResp.decode(msg.data);
+
+        _handleLogin(loginResp);
+        break;
+      case Codes.CODE_LOGIN_OUT_RESP://注销登录 响应
+        _handleLoginOutResp(msg);
+        break;
+    }//end switch
+  }
+
+
 }//end class

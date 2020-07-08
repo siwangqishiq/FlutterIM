@@ -13,14 +13,14 @@ class SessionPage extends StatefulWidget{
 class SessionPageState extends BaseState<SessionPage> {
   static const int TAB_INDEX_SESSION =0;
 
-  String _content = "会话";
+  static String content = "会话";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Text(
-          _content,
+          content,
           style: TextStyle(
             fontSize: 40,
             color: Colors.blueAccent,

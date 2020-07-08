@@ -2,6 +2,9 @@ import 'dart:typed_data';
 import 'dart:convert' show utf8;
 
 abstract class Codec {
+  static const int RESULT_CODE_SUCCESS = 1;
+  static const int RESULT_CODE_ERROR = -1;
+
   int _readIndex = 0;
 
   //转为字节流
@@ -55,13 +58,14 @@ abstract class Codec {
 
   num readInt64(Uint8List bytes){
     num result = bytes.sublist(_readIndex).buffer.asInt64List()[0];
+    _readIndex += 8;
     return result;
   }
 
   String readString(Uint8List bytes){
-    print("readString $bytes");
+    //print("readString $bytes");
     int len = bytes.sublist(_readIndex).buffer.asInt32List()[0];
-    print("$_readIndex len = $len");
+    //print("$_readIndex len = $len");
     String readString = utf8.decode(bytes.sublist(_readIndex + 4 , _readIndex + 4 + len));
     _readIndex += (4 + len); //string 长度 + 数据长度
 

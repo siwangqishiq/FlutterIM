@@ -17,7 +17,7 @@ void main() async {
 }
 
 void appInit() async{
-  await Account.loadAccount();
+  Account.loadAccount();
 }
 
 class MyApp extends StatelessWidget {

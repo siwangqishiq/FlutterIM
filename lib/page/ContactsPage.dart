@@ -12,7 +12,7 @@ class ContactsPage extends StatefulWidget{
 class ContactsPageState extends BaseState<ContactsPage> {
   static const int TAB_INDEX_CONTACT =1;
 
-  String _content = "好友";
+  static const String content = "好友";
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class ContactsPageState extends BaseState<ContactsPage> {
     return Scaffold(
       body: Center(
         child: Text(
-          _content,
+          content,
           style: TextStyle(
             fontSize: 40,
             color: Colors.blueAccent,
