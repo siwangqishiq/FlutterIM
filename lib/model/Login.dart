@@ -120,3 +120,48 @@ class LoginOutResp extends Codec {
     return Codes.CODE_LOGIN_OUT_RESP;
   }
 }
+
+//自动登录 请求
+class AutoLoginReq extends AuthBaseBean{
+  int synType = 1;
+
+  AutoLoginReq() : super(Account.getToken());
+
+  @override
+  void decodeModel(Uint8List rawData) {
+    synType = readInt32(rawData);
+  }
+
+  @override
+  Uint8List encodeModel(List<Uint8List> result) {
+    result.add(writeInt32(synType));
+    return null;
+  }
+
+  @override
+  int getCode() {
+    return Codes.CODE_AUTO_LOGIN_REQ;
+  }
+}
+
+class AutoLoginResp extends Codec{
+  int resultCode;
+
+  @override
+  void decode(Uint8List rawData) {
+    resetReadIndex();
+    resultCode = readInt32(rawData);
+  }
+  
+  @override
+  Uint8List encode() {
+    List<Uint8List> result = [];
+    result.add(writeInt32(resultCode));
+    return Uint8List.fromList(result.expand((x) => x).toList());
+  }
+
+  @override
+  int getCode() {
+    return Codes.CODE_AUTO_LOGIN_REQ;
+  }
+}

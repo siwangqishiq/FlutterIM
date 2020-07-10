@@ -14,6 +14,7 @@ class AuthBaseBean extends Codec{
   }
 
   Uint8List encodeModel(List<Uint8List> result){
+    return null;
   }
 
   @override

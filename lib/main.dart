@@ -7,7 +7,6 @@ import 'package:imclient/page/MainPage.dart';
 import 'package:imclient/page/pages.dart';
 import 'dart:convert' show utf8;
 import 'core/Account.dart';
-import 'model/Person.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //确保flutter环境已经完全启动  否则后面会报错
@@ -17,7 +16,12 @@ void main() async {
 }
 
 void appInit() async{
-  Account.loadAccount();
+  await Account.loadAccount();
+  
+  //print("Account isLogin = ${Account.isLogin()}");
+  if(Account.isLogin()){//自动登录
+    IMClient.getInstance().autoLogin();
+  }
 }
 
 class MyApp extends StatelessWidget {

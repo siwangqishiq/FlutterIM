@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:imclient/env/ServerConfig.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/bytebuf.dart';
@@ -254,6 +255,12 @@ class IMClient{
     _sendModel(loginOutReq);
   }
 
+  //利用token 自动登录
+  void autoLogin(){
+    AutoLoginReq autoLoginReq = new AutoLoginReq();
+    _sendModel(autoLoginReq);
+  }
+
   //注销登录响应
   void _handleLoginOutResp(Msg msg){
     LoginOutResp resp = new LoginOutResp();
@@ -281,6 +288,9 @@ class IMClient{
         break;
       case Codes.CODE_LOGIN_OUT_RESP://注销登录 响应
         _handleLoginOutResp(msg);
+        break;
+      case Codes.CODE_AUTO_LOGIN_RESP:
+        FlutterToast.showToast(msg: "自动登录成功");
         break;
     }//end switch
   }

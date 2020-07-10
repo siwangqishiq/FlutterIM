@@ -8,4 +8,7 @@ class Codes{
 
   static const int CODE_LOGIN_OUT_REQ  =1005;//注销登录req
   static const int CODE_LOGIN_OUT_RESP = 1006;//注销登录 resp
+
+  static const int CODE_AUTO_LOGIN_REQ = 1007;//自动登录req
+  static const int CODE_AUTO_LOGIN_RESP = 1008;//自动登录resp
 }
