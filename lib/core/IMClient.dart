@@ -198,7 +198,7 @@ class IMClient{
     if(_netStatus == NetStatus.online){
       // print("send msg : ${msg.code} ${msg.length} ${msg.data}");
       var sendBytes = msg.encode();
-      // print("sendBytes : $sendBytes");
+      //print("sendBytes : $sendBytes");
       //_socket.write(sendBytes);
       _socket.add(sendBytes);
       _socket.flush();
@@ -237,6 +237,7 @@ class IMClient{
 
   void _sendModel(Codec model){
     Msg msg = Msg.buildMsg(model.getCode() ,model);
+    print("msg = ${msg.length}  ${msg.code}");
     sendMsg(msg);
   }
 
