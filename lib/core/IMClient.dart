@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:imclient/env/ServerConfig.dart';
 import 'package:imclient/model/Codec.dart';
+import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/Login.dart';
@@ -279,6 +280,16 @@ class IMClient{
     }
   }
 
+  //获取好友信息列表
+  void onGetFriendList(Msg msg){
+    print("获取好友信息列表");
+    print("${msg.data}");
+    FriendResp resp = new FriendResp();
+    resp.decode(msg.data);
+
+    print("result = ${resp.result}");
+  }
+
   void _handleMsg(Msg msg){
     switch(msg.code){
       case Codes.CODE_LOGIN_RESP://登录响应
@@ -291,7 +302,11 @@ class IMClient{
         _handleLoginOutResp(msg);
         break;
       case Codes.CODE_AUTO_LOGIN_RESP:
+        print("自动登录");
         FlutterToast.showToast(msg: "自动登录成功");
+        break;
+      case Codes.CODE_FRIEND_LIST_RESP://
+        onGetFriendList(msg);
         break;
     }//end switch
   }
