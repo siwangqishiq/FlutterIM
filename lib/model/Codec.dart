@@ -22,6 +22,8 @@ abstract class Codec {
     _readIndex = 0;
   }
 
+  int getReadIndex() => _readIndex;
+
   //向字节流中写入一个32位int
   Uint8List writeInt32(int value){
     ByteData data = ByteData(4);
@@ -53,6 +55,11 @@ abstract class Codec {
   int readInt32(Uint8List bytes){
     int result = bytes.sublist(_readIndex).buffer.asInt32List()[0];
     _readIndex += 4;
+    return result;
+  }
+
+  static int readInt32NoMoveIndex(Uint8List bytes){
+    int result = bytes.sublist(0).buffer.asInt32List()[0];
     return result;
   }
 

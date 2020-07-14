@@ -53,6 +53,8 @@ class IMClient{
   
   List<Msg> _waitSendMsgs = [];
 
+  Uint8List preRawData =new Uint8List(1024);//上一次未读取完的byte数据
+
   static IMClient getInstance(){
     if(instance == null){
       instance = new IMClient();
@@ -63,6 +65,7 @@ class IMClient{
 
   IMClient(){
     _netStatus = NetStatus.offline;
+    preRawData.clear();
   }
 
   void init(){
@@ -144,19 +147,22 @@ class IMClient{
       (Uint8List data){
         print("received (${data.lengthInBytes}   |   ${data.length} ): ${data.runtimeType}");
         //print("content = ${ByteBufUtil.readString(data)}");
-        Msg msg = ByteBufUtil.readMsg(data);
 
-        if(msg == null)
-          return;
-        
-        print("received msg : length = ${msg.length} code = ${msg.code} ");  
-        //print("content = ${msg.data}");     
-        
-        _handleMsg(msg);
+        List<Msg> msgList = _parseRawData(data);
 
-        for(ClientCallback callback in callbackList){
-          callback.onReceivedMsg(msg);
-        }
+        for(Msg msg in msgList){
+          if(msg == null)
+            continue;
+        
+          print("received msg : length = ${msg.length} code = ${msg.code} ");  
+          //print("content = ${msg.data}");     
+        
+          _handleMsg(msg);
+
+          for(ClientCallback callback in callbackList){
+            callback.onReceivedMsg(msg);
+          }
+        }//end for each
       },
       onDone: (){
         print("on close socket");
@@ -170,11 +176,42 @@ class IMClient{
     );
   }
 
+  //解析接收到的原始数据
+  List<Msg> _parseRawData(Uint8List data){
+    if(preRawData.isNotEmpty){ //拼接上一次的数据
+      data.insertAll(0, preRawData);
+      preRawData.clear();
+    }
+
+    List<Msg> resultList = [];
+
+    while(data.isNotEmpty){
+      if(data.length < 4){ // 首字节不足4位
+        preRawData.addAll(data);
+        data.removeRange(0, data.length);
+        break;
+      }
+
+      int len = Codec.readInt32NoMoveIndex(data);
+      if(len > data.length){//数据不完整
+        preRawData.addAll(data);
+        data.removeRange(0, data.length);
+        break;
+      }else{ // len <= data.length
+        Msg msg = new Msg();
+        msg.decode(data);
+        resultList.add(msg);
+        data.removeRange(0, msg.getReadIndex());
+
+        print("msg readIndex = ${msg.getReadIndex()}  , length = ${msg.length}");
+      }
+    }//end while
+    return resultList;
+  }
+
   void closeSocket(){
     _netStatus = NetStatus.offline;
   }
-
-
 
   void _handleLogin(LoginResp loginResp){
     if(loginResp == null)
