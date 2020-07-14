@@ -53,7 +53,7 @@ class IMClient{
   
   List<Msg> _waitSendMsgs = [];
 
-  Uint8List preRawData =new Uint8List(1024);//上一次未读取完的byte数据
+  List<int> preRawData =[];//上一次未读取完的byte数据
 
   static IMClient getInstance(){
     if(instance == null){
@@ -177,36 +177,39 @@ class IMClient{
   }
 
   //解析接收到的原始数据
-  List<Msg> _parseRawData(Uint8List data){
+  List<Msg> _parseRawData(Uint8List rawData){
+    List<int> dataList = ByteBufUtil.convertUint8ListToMutable(rawData);
+    
     if(preRawData.isNotEmpty){ //拼接上一次的数据
-      data.insertAll(0, preRawData);
+      dataList.insertAll(0, preRawData);
       preRawData.clear();
     }
 
-    List<Msg> resultList = [];
+    List<Msg> resultMsgList = [];
 
-    while(data.isNotEmpty){
-      if(data.length < 4){ // 首字节不足4位
-        preRawData.addAll(data);
-        data.removeRange(0, data.length);
+    while(dataList.isNotEmpty){
+      if(dataList.length < 4){ // 首字节不足4位
+        preRawData.addAll(dataList);
+        dataList.removeRange(0, dataList.length);
         break;
       }
 
-      int len = Codec.readInt32NoMoveIndex(data);
-      if(len > data.length){//数据不完整
-        preRawData.addAll(data);
-        data.removeRange(0, data.length);
+      int len = ByteBufUtil.readInt32(dataList);
+      if(len > dataList.length){//数据不完整
+        preRawData.addAll(dataList);
+        dataList.removeRange(0, dataList.length);
         break;
       }else{ // len <= data.length
         Msg msg = new Msg();
-        msg.decode(data);
-        resultList.add(msg);
-        data.removeRange(0, msg.getReadIndex());
+        print("msg len = $len  , dataLen = ${dataList.length}");
+        msg.decode(Uint8List.fromList(dataList.sublist(0,len)));
 
-        print("msg readIndex = ${msg.getReadIndex()}  , length = ${msg.length}");
+        resultMsgList.add(msg);
+
+        dataList.removeRange(0, len);
       }
     }//end while
-    return resultList;
+    return resultMsgList;
   }
 
   void closeSocket(){
