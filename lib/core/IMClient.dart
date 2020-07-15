@@ -2,6 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:imclient/env/ServerConfig.dart';
+import 'package:imclient/im/Action.dart';
+import 'package:imclient/im/AutoLogin.dart';
+import 'package:imclient/im/LoginAction.dart';
+import 'package:imclient/im/LoginOutAction.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/bytebuf.dart';
@@ -51,8 +55,7 @@ class IMClient{
   AuthCallback _authCallback;
   LoginOutCallback _loginOutCallback;
   
-  List<Msg> _waitSendMsgs = [];
-
+  List<Msg> _waitSendMsgs = [];//缓存未来得及发送的数据包
   List<int> preRawData =[];//上一次未读取完的byte数据
 
   static IMClient getInstance(){
@@ -76,10 +79,6 @@ class IMClient{
     if(_authCallback != authCb){
       _authCallback = authCb;
     }
-  }
-
-  void clearAuthCallback(){
-    _authCallback = null;
   }
 
   void addLoginOutCallback(LoginOutCallback cb){
@@ -107,6 +106,10 @@ class IMClient{
     return callbackList.remove(cb);
   }
 
+  void clearAuthCallback(){
+    _authCallback = null;
+  }
+
   void connectServer(){
     if(_netStatus == NetStatus.online || _netStatus == NetStatus.connecting){
       print("connect server cancel");
@@ -121,6 +124,7 @@ class IMClient{
       print("connect success! ${socket.address} : ${socket.port} => ${socket.remoteAddress} : ${socket.remotePort}");
       _socket = socket;
       _switchStatus(_netStatus, NetStatus.online);
+
       addSocketListener();
 
       // 
@@ -158,10 +162,6 @@ class IMClient{
           //print("content = ${msg.data}");     
         
           _handleMsg(msg);
-
-          for(ClientCallback callback in callbackList){
-            callback.onReceivedMsg(msg);
-          }
         }//end for each
       },
       onDone: (){
@@ -214,24 +214,6 @@ class IMClient{
 
   void closeSocket(){
     _netStatus = NetStatus.offline;
-  }
-
-  void _handleLogin(LoginResp loginResp){
-    if(loginResp == null)
-      return;
-
-    if(loginResp.resultCode == LoginResp.RESULT_CODE_SUCCESS){
-      Account.setUserInfo(loginResp.token, loginResp.account, loginResp.uid , loginResp.avator , loginResp.name);
-
-      if(_authCallback != null){
-        _authCallback.onAuthSuccess(loginResp.token, loginResp.account, loginResp.uid);
-        clearAuthCallback();
-      }
-    }else{//登录失败
-      if(_authCallback != null){
-        _authCallback.onAuthError(loginResp.resultCode);
-      }
-    }
   }
 
   // 发送Msg消息
@@ -303,23 +285,6 @@ class IMClient{
     _sendModel(autoLoginReq);
   }
 
-  //注销登录响应
-  void _handleLoginOutResp(Msg msg){
-    LoginOutResp resp = new LoginOutResp();
-    resp.decode(msg.data);
-
-    if(resp.resultCode == Codec.RESULT_CODE_SUCCESS){
-      Account.clearUserInfo();
-      if(_loginOutCallback != null){
-        _loginOutCallback.loginOutSuccess();
-      }
-    }else{
-      if(_loginOutCallback != null){
-        _loginOutCallback.loginOutError();
-      }
-    }
-  }
-
   //获取好友信息列表
   void onGetFriendList(Msg msg){
     print("获取好友信息列表");
@@ -330,26 +295,35 @@ class IMClient{
     print("result = ${resp.result}");
   }
 
+  //处理消息
   void _handleMsg(Msg msg){
+    IMAction action;
     switch(msg.code){
       case Codes.CODE_LOGIN_RESP://登录响应
-        LoginResp loginResp = new LoginResp();
-        loginResp.decode(msg.data);
-
-        _handleLogin(loginResp);
+        action = new LoginAction(_authCallback);
         break;
       case Codes.CODE_LOGIN_OUT_RESP://注销登录 响应
-        _handleLoginOutResp(msg);
+        action = new LoginOutAction(_loginOutCallback);
         break;
       case Codes.CODE_AUTO_LOGIN_RESP:
-        print("自动登录");
-        FlutterToast.showToast(msg: "自动登录成功");
+        action = new AutoLoginAction();
         break;
       case Codes.CODE_FRIEND_LIST_RESP://
         onGetFriendList(msg);
         break;
     }//end switch
-  }
 
+    //执行action 逻辑
+    if(action == null)
+      return;
+
+    action.handleMsg(msg);
+
+    if(action.needCallback()){
+      for(ClientCallback callback in callbackList){ //callback for others
+        callback.onReceivedMsg(msg);
+      }//end for each
+    }
+  }
 
 }//end class
