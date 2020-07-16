@@ -10,7 +10,8 @@ class AuthBaseBean extends Codec{
 
   AuthBaseBean(this.token);
 
-  void decodeModel(Uint8List rawData){
+  int decodeModel(Uint8List rawData){
+    return 0;
   }
 
   Uint8List encodeModel(List<Uint8List> result){
@@ -18,11 +19,13 @@ class AuthBaseBean extends Codec{
   }
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
     token = readString(rawData);
 
     decodeModel(rawData);
+
+    return getReadIndex();
   }
 
   @override

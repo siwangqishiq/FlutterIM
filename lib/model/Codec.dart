@@ -10,8 +10,8 @@ abstract class Codec {
   //转为字节流
   Uint8List encode();
 
-  //字节流转为对象
-  void decode(Uint8List rawData);
+  //字节流转为对象 返回读取的字节数
+  int decode(Uint8List rawData);
 
   int getCode(){
     return 0;
@@ -58,6 +58,43 @@ abstract class Codec {
     return result;
   }
 
+  //写入一个list
+  Uint8List writeList<T extends Codec>(List<T> list){
+    if(list == null){
+      return writeInt32(0);
+    }else{
+      List<Uint8List> result = [];
+      result.add(writeInt32(list.length));
+      for(int i =0 ; i < list.length; i++){
+        Codec item = list[i];
+        result.add(item.encode());
+      }//end for i
+      return Uint8List.fromList(result.expand((x)=>x).toList());
+    }
+  }
+
+  //读取一个List
+  List<T> readList<T extends Codec>(Uint8List bytes, IGenListItem genCallback){
+    int listSize = readInt32(bytes);
+    print("listSize = $listSize");
+    
+    List<T> list = [];
+    if(listSize > 0){
+      for(int i = 0 ; i < listSize ; i++){
+        if(genCallback != null){
+          T item = genCallback.createListItem();
+          
+          int readByteCount = item.decode(bytes.sublist(_readIndex));
+          _readIndex += readByteCount;
+          print("read list readIndex = $_readIndex");
+
+          list.add(item);
+        }      
+      }//end for i
+    }
+    return list;
+  }
+
   static int readInt32NoMoveIndex(Uint8List bytes){
     int result = bytes.sublist(0).buffer.asInt32List()[0];
     return result;
@@ -78,4 +115,10 @@ abstract class Codec {
 
     return readString;
   }
+
 }//end class
+
+//生成列表中的实体对象
+abstract class IGenListItem <T extends Codec>{
+  T createListItem();
+}

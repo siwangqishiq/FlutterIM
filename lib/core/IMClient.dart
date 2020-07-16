@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:imclient/env/ServerConfig.dart';
 import 'package:imclient/im/Action.dart';
 import 'package:imclient/im/AutoLogin.dart';
+import 'package:imclient/im/GetFriendListAction.dart';
 import 'package:imclient/im/LoginAction.dart';
 import 'package:imclient/im/LoginOutAction.dart';
 import 'package:imclient/model/Codec.dart';
@@ -285,16 +286,6 @@ class IMClient{
     _sendModel(autoLoginReq);
   }
 
-  //获取好友信息列表
-  void onGetFriendList(Msg msg){
-    print("获取好友信息列表");
-    print("${msg.data}");
-    FriendResp resp = new FriendResp();
-    resp.decode(msg.data);
-
-    print("result = ${resp.result}");
-  }
-
   //处理消息
   void _handleMsg(Msg msg){
     IMAction action;
@@ -305,11 +296,11 @@ class IMClient{
       case Codes.CODE_LOGIN_OUT_RESP://注销登录 响应
         action = new LoginOutAction(_loginOutCallback);
         break;
-      case Codes.CODE_AUTO_LOGIN_RESP:
+      case Codes.CODE_AUTO_LOGIN_RESP://自动登录
         action = new AutoLoginAction();
         break;
-      case Codes.CODE_FRIEND_LIST_RESP://
-        onGetFriendList(msg);
+      case Codes.CODE_FRIEND_LIST_RESP://好友列表
+        action = new GetFriendListAction();
         break;
     }//end switch
 

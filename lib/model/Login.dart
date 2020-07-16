@@ -10,11 +10,13 @@ class LoginReq extends Codec {
   String password;
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
 
     account = readString(rawData);
     password = readString(rawData);
+
+    return getReadIndex();
   }
 
   @override
@@ -43,7 +45,7 @@ class LoginResp extends Codec {
   String name;
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
 
     resultCode = readInt32(rawData);
@@ -52,6 +54,8 @@ class LoginResp extends Codec {
     uid = readInt64(rawData);
     avator = readString(rawData);
     name = readString(rawData);
+
+    return getReadIndex();
   }
 
   @override
@@ -81,13 +85,15 @@ class LoginOutReq extends AuthBaseBean {
   LoginOutReq(this.uid) : super(Account.getToken());
 
   @override
-  void decodeModel(Uint8List rawData) {
+  int decodeModel(Uint8List rawData) {
     uid = readInt64(rawData);
+    return getReadIndex();
   }
 
   @override
   Uint8List encodeModel(List<Uint8List> result) {
     result.add(writeInt64(uid));
+    return null;
   }
 
   @override
@@ -103,9 +109,11 @@ class LoginOutResp extends Codec {
   int resultCode;
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
     resultCode = readInt32(rawData);
+
+    return getReadIndex();
   }
 
   @override
@@ -128,8 +136,10 @@ class AutoLoginReq extends AuthBaseBean{
   AutoLoginReq() : super(Account.getToken());
 
   @override
-  void decodeModel(Uint8List rawData) {
+  int decodeModel(Uint8List rawData) {
     synType = readInt32(rawData);
+
+    return getReadIndex();
   }
 
   @override
@@ -148,9 +158,11 @@ class AutoLoginResp extends Codec{
   int resultCode;
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
     resultCode = readInt32(rawData);
+
+    return getReadIndex();
   }
   
   @override

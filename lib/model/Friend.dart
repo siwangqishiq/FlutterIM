@@ -3,19 +3,31 @@ import 'dart:typed_data';
 
 import 'package:imclient/model/Codec.dart';
 
-class FriendResp extends Codec{
+///
+///好友数据列表
+///
+class FriendResp extends Codec implements IGenListItem<Friend>{
   int result;
+  List<Friend> friendList;
+  
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
     result = readInt32(rawData);
+    friendList = readList(rawData, this);
+    return getReadIndex();
   }
 
   @override
   Uint8List encode() {
     return null;
   }
-}
+
+  @override
+  Friend createListItem() {
+    return new Friend();
+  }
+}//end class
 
 class Friend extends Codec{
   int uid;
@@ -26,15 +38,17 @@ class Friend extends Codec{
   int age;
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
-    
+
     uid = readInt32(rawData);
     account = readString(rawData);
     avator = readString(rawData);
     sex = readInt32(rawData);
     nick = readString(rawData);
     age = readInt32(rawData);
+
+    return getReadIndex();
   }
 
   @override

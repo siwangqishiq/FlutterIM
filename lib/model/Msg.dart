@@ -27,13 +27,15 @@ class Msg extends Codec {
   }
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
 
     length = readInt32(rawData);
     code = readInt32(rawData);
 
     data = rawData.sublist(8);
+    
+    return getReadIndex();
   }
 
   @override

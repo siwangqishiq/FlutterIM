@@ -15,11 +15,13 @@ class PesonResp extends Codec{
   }
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
     
     content = readString(rawData);
     time = readInt64(rawData);
+
+    return getReadIndex();
   }
 }
 
@@ -46,11 +48,13 @@ class Person extends Codec{
   }
 
   @override
-  void decode(Uint8List rawData) {
+  int decode(Uint8List rawData) {
     resetReadIndex();
 
     name = readString(rawData);
     age = readInt32(rawData);
     desc = readString(rawData);
+
+    return getReadIndex();
   }
 }//end class
