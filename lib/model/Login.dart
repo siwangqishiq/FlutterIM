@@ -33,6 +33,7 @@ class LoginReq extends Codec {
   }
 }
 
+//登录结果报文 会带上登录者的个人信息
 class LoginResp extends Codec {
   static const int RESULT_CODE_SUCCESS = 1;
   static const int RESULT_CODE_ERROR = -1;
@@ -43,6 +44,9 @@ class LoginResp extends Codec {
   int uid;
   String avator;
   String name;
+  int sex;
+  String desc;
+  int age;
 
   @override
   int decode(Uint8List rawData) {
@@ -54,6 +58,10 @@ class LoginResp extends Codec {
     uid = readInt64(rawData);
     avator = readString(rawData);
     name = readString(rawData);
+
+    sex = readInt32(rawData);
+    desc = readString(rawData);
+    age = readInt32(rawData);
 
     return getReadIndex();
   }
@@ -68,6 +76,10 @@ class LoginResp extends Codec {
     result.add(writeInt64(uid));
     result.add(writeString(avator));
     result.add(writeString(name));
+
+    result.add(writeInt32(sex));
+    result.add(writeString(desc));
+    result.add(writeInt32(age));
 
     return Uint8List.fromList(result.expand((x) => x).toList());
   }

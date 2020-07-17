@@ -73,9 +73,6 @@ class _WebSocketRouteState extends State<WebSocketRoute>
 
   @override
   void onNetStatusChange(NetStatus oldStatus, NetStatus newStatus) {
-    String content = null;
-    if(newStatus == NetStatus){
-      
-    }
+    
   }
 }//end class

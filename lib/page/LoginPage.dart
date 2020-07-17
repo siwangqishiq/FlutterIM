@@ -49,6 +49,7 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
           children: <Widget>[
             TextField(
               maxLines: 1,
+              
               decoration: InputDecoration(
                 labelText: "用户名",
                 hintText: "输入用户名"
@@ -56,7 +57,7 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
               onChanged: (text) {//内容改变的回调
                 _account = text;
                 _onInputTextChange();
-              }
+              },
             ),
 
             TextField(

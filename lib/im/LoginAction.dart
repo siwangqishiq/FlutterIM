@@ -28,11 +28,8 @@ class LoginAction extends IMAction{
       return;
     
     if(loginResp.resultCode == LoginResp.RESULT_CODE_SUCCESS){
-      Account.setUserInfo(loginResp.token, 
-                          loginResp.account, 
-                          loginResp.uid , 
-                          loginResp.avator , 
-                          loginResp.name);
+      Account.setUserInfo(loginResp.token, loginResp.account, loginResp.uid , loginResp.avator , 
+                          loginResp.name,loginResp.sex , loginResp.desc , loginResp.age);
 
       if(authCallback != null){
         authCallback.onAuthSuccess(loginResp.token, loginResp.account, loginResp.uid);

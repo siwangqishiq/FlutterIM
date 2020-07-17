@@ -8,12 +8,18 @@ class Account {
   static const String _KEY_UID = "_uid";
   static const String _KEY_AVATOR = "_avator";
   static const String _KEY_NAME = "_name";
+  static const String _KEY_DESC = "_desc";
+  static const String _KEY_SEX = "_sex";
+  static const String _KEY_AGE = "_age";
 
   static String _token;
   static String _account;
   static int _uid;
   static String _avator;
   static String name;
+  static int sex;
+  static String desc;
+  static int age;
 
   //
   static Future loadAccount() async{
@@ -23,19 +29,21 @@ class Account {
     _uid = prefs.getInt(_KEY_UID);
     _avator = prefs.getString(_KEY_AVATOR);
     name = prefs.getString(_KEY_NAME);
-//    print("token : $_token");
-//    print("account : $_account");
-//    print("uid : $_uid");
-//    print("avator : $_avator");
+    sex = prefs.getInt(_KEY_SEX);
+    desc = prefs.getString(_KEY_DESC);
+    age = prefs.getInt(_KEY_AGE);
   }
 
-  static void setUserInfo(String token , String account , int uid , String avator , String displayName) async {
+  static void setUserInfo(String token , String account , int uid , String avator , String displayName , 
+  int male , String description , int _age) async {
     _token = token;
     _account = account;
     _uid = uid;
     _avator = avator;
     name = displayName;
-
+    sex = male;
+    desc = description;
+    age = _age;
     _infoDao();
   }
 
@@ -45,6 +53,9 @@ class Account {
     _uid = 0;
     _avator = null;
     name = null;
+    sex = 1;
+    desc = null;
+    age = 0;
 
     _infoDao();
   }
@@ -56,6 +67,9 @@ class Account {
     prefs.setInt(_KEY_UID, _uid);
     prefs.setString(_KEY_AVATOR, _avator);
     prefs.setString(_KEY_NAME, name);
+    prefs.setInt(_KEY_SEX, sex);
+    prefs.setString(_KEY_DESC, desc);
+    prefs.setInt(_KEY_AGE, age);
   }
 
   static String getToken(){

@@ -14,6 +14,8 @@ class FriendResp extends Codec implements IGenListItem<Friend>{
   int decode(Uint8List rawData) {
     resetReadIndex();
     result = readInt32(rawData);
+    print("friendResp  result = $result");
+
     friendList = readList(rawData, this);
     return getReadIndex();
   }
@@ -30,6 +32,10 @@ class FriendResp extends Codec implements IGenListItem<Friend>{
 }//end class
 
 class Friend extends Codec{
+  static const int SEX_MALE = 1;
+  static const int SEX_FEMALE = 0;
+
+
   int uid;
   String account;
   String avator;
@@ -41,10 +47,10 @@ class Friend extends Codec{
   int decode(Uint8List rawData) {
     resetReadIndex();
 
-    uid = readInt32(rawData);
-    account = readString(rawData);
-    avator = readString(rawData);
+    uid = readInt64(rawData);
     sex = readInt32(rawData);
+    avator = readString(rawData);
+    account = readString(rawData);
     nick = readString(rawData);
     age = readInt32(rawData);
 
@@ -54,12 +60,17 @@ class Friend extends Codec{
   @override
   Uint8List encode() {
     List<Uint8List> result = [];
-    result.add(writeInt32(uid));
-    result.add(writeString(account));
-    result.add(writeString(avator));
+    result.add(writeInt64(uid));
     result.add(writeInt32(sex));
+    result.add(writeString(avator));
+    result.add(writeString(account));
     result.add(writeString(nick));
     result.add(writeInt32(age));
     return Uint8List.fromList(result.expand((x)=>x).toList());
+  }
+
+  @override
+  String toString() {
+    return "{ uid = $uid , sex = $sex , avator =$avator , account = $account , nick = $nick , age =$age}";
   }
 }

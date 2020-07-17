@@ -84,9 +84,10 @@ abstract class Codec {
         if(genCallback != null){
           T item = genCallback.createListItem();
           
+          print("read list readIndex = $_readIndex");
           int readByteCount = item.decode(bytes.sublist(_readIndex));
           _readIndex += readByteCount;
-          print("read list readIndex = $_readIndex");
+          
 
           list.add(item);
         }      

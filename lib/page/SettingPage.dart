@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:imclient/core/Account.dart';
 import 'package:imclient/core/IMClient.dart';
+import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/page/BaseState.dart';
 
@@ -41,7 +42,21 @@ class SettingPageState extends BaseState<SettingPage> {
             ),
             Align(
               alignment:Alignment.center,
-              child: Text(Account.name,style: TextStyle(fontSize: 18.0),),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(Account.sex==Friend.SEX_FEMALE? "assets/images/icon_female.png":"assets/images/icon_male.png",width: 20.0,height: 20.0,),
+                  SizedBox(width: 10.0,),
+                  Text(Account.name,style: TextStyle(fontSize: 25.0)),
+                ],
+              )
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            Align(
+              alignment:Alignment.center,
+              child: Text(Account.desc,style: TextStyle(fontSize: 15.0 ,color: Colors.grey)),
             ),
             Expanded(
               child: SizedBox(

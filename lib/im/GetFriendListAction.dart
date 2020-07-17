@@ -1,4 +1,6 @@
+
 import 'package:imclient/im/Action.dart';
+import 'package:imclient/im/FriendDataCache.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/Msg.dart';
@@ -16,6 +18,9 @@ class GetFriendListAction extends IMAction{
   }
 
   void onReceivedFriendList(List<Friend> friendList){
-
+    // for(Friend friend in friendList){
+    //   print("friend : ${friend.toString()}");
+    // }
+    FriendDataCache.instance().reAddAllFriend(friendList);
   }
-}
+}//end class
