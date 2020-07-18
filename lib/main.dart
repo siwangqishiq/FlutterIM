@@ -17,8 +17,8 @@ void main() async {
 
 void appInit() async{
   await Account.loadAccount();
-  
-  //print("Account isLogin = ${Account.isLogin()}");
+
+  print("Account isLogin = ${Account.isLogin()}");
   if(Account.isLogin()){//自动登录
     IMClient.getInstance().autoLogin();
   }

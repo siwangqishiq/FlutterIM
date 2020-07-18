@@ -14,7 +14,7 @@ class FriendResp extends Codec implements IGenListItem<Friend>{
   int decode(Uint8List rawData) {
     resetReadIndex();
     result = readInt32(rawData);
-    print("friendResp  result = $result");
+    //print("friendResp  result = $result");
 
     friendList = readList(rawData, this);
     return getReadIndex();
@@ -42,6 +42,7 @@ class Friend extends Codec{
   int sex;
   String nick;
   int age;
+  String desc;
 
   @override
   int decode(Uint8List rawData) {
@@ -53,6 +54,7 @@ class Friend extends Codec{
     account = readString(rawData);
     nick = readString(rawData);
     age = readInt32(rawData);
+    desc = readString(rawData);
 
     return getReadIndex();
   }
@@ -66,6 +68,8 @@ class Friend extends Codec{
     result.add(writeString(account));
     result.add(writeString(nick));
     result.add(writeInt32(age));
+    result.add(writeString(desc));
+
     return Uint8List.fromList(result.expand((x)=>x).toList());
   }
 

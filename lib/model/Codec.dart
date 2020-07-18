@@ -76,18 +76,17 @@ abstract class Codec {
   //读取一个List
   List<T> readList<T extends Codec>(Uint8List bytes, IGenListItem genCallback){
     int listSize = readInt32(bytes);
-    print("listSize = $listSize");
-    
+    //print("listSize = $listSize");
+
     List<T> list = [];
     if(listSize > 0){
       for(int i = 0 ; i < listSize ; i++){
         if(genCallback != null){
           T item = genCallback.createListItem();
           
-          print("read list readIndex = $_readIndex");
+          //print("read list readIndex = $_readIndex");
           int readByteCount = item.decode(bytes.sublist(_readIndex));
           _readIndex += readByteCount;
-          
 
           list.add(item);
         }      

@@ -5,6 +5,7 @@ import 'package:imclient/im/FriendDataCache.dart';
 import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/page/BaseState.dart';
+import 'package:imclient/page/FriendCardPage.dart';
 
 class ContactsPage extends StatefulWidget{
   @override
@@ -26,6 +27,7 @@ class ContactsPageState extends BaseState<ContactsPage> {
     return Scaffold(
       body: Align(
         child: ListView.builder(
+          padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
           itemCount: FriendDataCache.instance().get().length,
           itemBuilder: _craeteContactItem
         ),
@@ -36,7 +38,33 @@ class ContactsPageState extends BaseState<ContactsPage> {
   //创建每一项
   Widget _craeteContactItem(BuildContext context, int index){
     final Friend itemData = FriendDataCache.instance().get()[index];
-    return Text(itemData.nick);
+    
+    return Column(
+      children: <Widget>[
+        ListTile(
+          leading:ClipOval(
+            child:Container(
+              child: Hero(tag: itemData.avator, child: Image.network(itemData.avator,fit: BoxFit.cover,)),
+              color: Colors.grey,
+              width: 50.0,
+              height: 50.0,
+            ),
+          ),
+          title: Text(itemData.nick),
+          onTap: (){
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => FriendCardPage(itemData)
+            ));
+          },
+        ),
+        Divider(
+          height:10.0,
+          color: Colors.grey,
+          indent:70.0
+        )
+      ],
+    );
+    
   }
 
   @override
