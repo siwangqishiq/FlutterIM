@@ -5,14 +5,25 @@ import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/page/LoginPage.dart';
 import 'package:imclient/page/MainPage.dart';
 import 'package:imclient/page/pages.dart';
+import 'package:imclient/util/GenUtil.dart';
 import 'dart:convert' show utf8;
 import 'core/Account.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //确保flutter环境已经完全启动  否则后面会报错
-  
+  unitTest();
   appInit();
   runApp(MyApp());
+}
+
+void unitTest(){
+  // for(int i=0 ;i < 100;i++){
+  //   print(GenUtil.get16Uuid());
+  // }
+
+  // LruCache<String , String> cache = LruCache();
+
+  LruCache<Long,String> cache = LruCache<Long,String>();
 }
 
 void appInit() async{
