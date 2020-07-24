@@ -1,20 +1,24 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:imclient/model/Codec.dart';
+import 'package:imclient/util/GenUtil.dart';
 
 //通信msg
 class Msg extends Codec {
   int length;
+  int uuid;
   int code;
   Uint8List data;
 
   Msg();
 
   static Msg buildMsg(int code, Codec data){
-    Msg msg = new Msg();
+    final Msg msg = new Msg();
+    
     msg.code = code;
-    msg.length = 8; 
+    msg.uuid = GenUtil.genUuid();
+
+    msg.length = 4 + 4 + 8; 
     if(data != null){
       Uint8List dataBytes = data.encode();
       msg.data = dataBytes;
@@ -31,9 +35,10 @@ class Msg extends Codec {
     resetReadIndex();
 
     length = readInt32(rawData);
+    uuid = readInt64(rawData);
     code = readInt32(rawData);
 
-    data = rawData.sublist(8);
+    data = rawData.sublist(4 + 4 + 8);
     
     return getReadIndex();
   }
@@ -43,7 +48,9 @@ class Msg extends Codec {
     List<Uint8List> result = [];
 
     result.add(writeInt32(length));
+    result.add(writeInt64(uuid));
     result.add(writeInt32(code));
+
     result.add(data);
 
     return Uint8List.fromList(result.expand((x)=>x).toList());

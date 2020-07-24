@@ -11,7 +11,7 @@ abstract class RecipeMsg extends Codec{
 
   //生成
   static int gen16Uuid(){
-    return GenUtil.get16Uuid();
+    return GenUtil.genUuid();
   }
 
   @override

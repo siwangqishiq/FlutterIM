@@ -4,8 +4,11 @@ import 'dart:convert' show utf8;
 abstract class Codec {
   static const int RESULT_CODE_SUCCESS = 1;
   static const int RESULT_CODE_ERROR = -1;
+  
+  int sendTimes = 0;
 
   int _readIndex = 0;
+  SendCallback _callback;
 
   //转为字节流
   Uint8List encode();
@@ -13,8 +16,22 @@ abstract class Codec {
   //字节流转为对象 返回读取的字节数
   int decode(Uint8List rawData);
 
+  //设置事件回调
+  void setCallback(SendCallback cb){
+    _callback = cb;
+  }
+
+  SendCallback getCallback(){
+    return _callback;
+  }
+
   int getCode(){
     return 0;
+  }
+
+  //是否有超时重发确认机制  默认没有
+  bool needResend(){
+    return false;
   }
 
   //重置已读索引
@@ -95,10 +112,10 @@ abstract class Codec {
     return list;
   }
 
-  static int readInt32NoMoveIndex(Uint8List bytes){
-    int result = bytes.sublist(0).buffer.asInt32List()[0];
-    return result;
-  }
+  // static int readInt32NoMoveIndex(Uint8List bytes){
+  //   int result = bytes.sublist(0).buffer.asInt32List()[0];
+  //   return result;
+  // }
 
   num readInt64(Uint8List bytes){
     num result = bytes.sublist(_readIndex).buffer.asInt64List()[0];
@@ -121,4 +138,10 @@ abstract class Codec {
 //生成列表中的实体对象
 abstract class IGenListItem <T extends Codec>{
   T createListItem();
+}
+
+//发送消息时 产生的事件回调
+abstract class SendCallback{
+  //重试超过指定次数仍然无回应 则报错 回调
+  void onSendError(Codec msg);
 }

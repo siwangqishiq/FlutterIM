@@ -189,3 +189,4 @@ class AutoLoginResp extends Codec{
     return Codes.CODE_AUTO_LOGIN_REQ;
   }
 }
+

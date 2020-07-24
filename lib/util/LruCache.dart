@@ -11,6 +11,10 @@ class LruCache<K,V>{
   LinkedHashMap _map = LinkedHashMap();
   int _cacheSize = DEFAULT_CACHE_SIZE;
 
+  LruCache({cacheSize: DEFAULT_CACHE_SIZE}){
+    _cacheSize = cacheSize;
+  }
+
   void put(K key , V value){
     _map[key] = value;
     _afterPutMap();
@@ -23,9 +27,11 @@ class LruCache<K,V>{
 
   void _afterPutMap(){
     while(_map.length > _cacheSize){
-      Iterable<V> keyIter = _map.values;
+      var keyIter = _map.keys;
+      //print(keyIter);
       _map.remove(keyIter.first);
-    }
+      //print("remove elem $rmV");
+    }//end while
   }
 }
 

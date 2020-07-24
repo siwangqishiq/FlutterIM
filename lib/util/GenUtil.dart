@@ -2,9 +2,10 @@ import 'package:sprintf/sprintf.dart';
 import 'package:uuid/uuid.dart';
 
 class GenUtil{
+  static const String GEN_BY_SERVER = "11";
   static const String GEN_BY_MOBILE = "22";
 
-  static int get16Uuid(){
+  static int genUuid(){
       String machineId = GEN_BY_MOBILE;
       var uuid = Uuid();
       int hashCode = uuid.v1().hashCode;

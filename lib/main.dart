@@ -6,6 +6,7 @@ import 'package:imclient/page/LoginPage.dart';
 import 'package:imclient/page/MainPage.dart';
 import 'package:imclient/page/pages.dart';
 import 'package:imclient/util/GenUtil.dart';
+import 'package:imclient/util/LruCache.dart';
 import 'dart:convert' show utf8;
 import 'core/Account.dart';
 
@@ -23,7 +24,17 @@ void unitTest(){
 
   // LruCache<String , String> cache = LruCache();
 
-  LruCache<Long,String> cache = LruCache<Long,String>();
+  // LruCache<int,String> cache = LruCache<int,String>(cacheSize: 3);
+  // cache.put(1, "111");
+  // cache.put(2, "222");
+  // cache.put(3, "333");
+
+  // cache.put(4, "4444");
+
+  // print("LruCache ---> ${cache.get(1)}");
+
+  int u = GenUtil.genUuid();
+  print("GenUtil ---> $u");
 }
 
 void appInit() async{

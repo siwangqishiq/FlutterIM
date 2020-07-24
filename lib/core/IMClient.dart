@@ -9,11 +9,14 @@ import 'package:imclient/im/LoginAction.dart';
 import 'package:imclient/im/LoginOutAction.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/Friend.dart';
+import 'package:imclient/model/RecipeAck.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/model/Login.dart';
 import 'package:imclient/core/Codes.dart';
 import 'package:imclient/core/Account.dart';
+import 'package:imclient/util/LruCache.dart';
+import 'package:imclient/util/TimeUtil.dart';
 
 //typedef OnMsgCallback = bool Function(Msg msg);
 
@@ -49,6 +52,9 @@ enum NetStatus{
 class IMClient{
   static IMClient instance;
 
+  static const int RESEND_TIME_OUT = 30;//重发超时时间
+  static const int MAX_RETRY_TIMES = 4;//最大重试次数 
+
   Socket _socket;
   NetStatus  _netStatus;
 
@@ -58,6 +64,13 @@ class IMClient{
   
   List<Msg> _waitSendMsgs = [];//缓存未来得及发送的数据包
   List<int> preRawData =[];//上一次未读取完的byte数据
+
+  LruCache<int , Msg> _receivedMsgCache = new LruCache<int , Msg>(cacheSize:128);
+
+  int _lastSockReadTime = 0;
+  int _lastSockWriteTime = 0; //记录上一次Socket读写时间
+
+  Map<int , Codec> _shouldResendMsgs = {};//缓存需要超时重发的消息
 
   static IMClient getInstance(){
     if(instance == null){
@@ -72,8 +85,15 @@ class IMClient{
     preRawData.clear();
   }
 
+
   void init(){
     connectServer();
+    _schduleTask();
+  }
+  
+  //启动一个定时任务 空闲时完成心跳包的发送
+  void _schduleTask(){
+    
   }
 
   void addAuthCallback(AuthCallback authCb){
@@ -125,7 +145,7 @@ class IMClient{
       print("connect success! ${socket.address} : ${socket.port} => ${socket.remoteAddress} : ${socket.remotePort}");
       _socket = socket;
       _switchStatus(_netStatus, NetStatus.online);
-
+      
       addSocketListener();
 
       // 
@@ -150,24 +170,31 @@ class IMClient{
 
     _socket.listen(
       (Uint8List data){
-        print("received (${data.lengthInBytes}   |   ${data.length} ): ${data.runtimeType}");
+        _lastSockReadTime = TimeUtil.getNowMilliseconds(); //更新读写时间值
+
+        print("received (${data.lengthInBytes}   |   ${data.length})");
         //print("content = ${ByteBufUtil.readString(data)}");
 
         List<Msg> msgList = _parseRawData(data);
-
+        
         for(Msg msg in msgList){
           if(msg == null)
             continue;
-        
-          print("received msg : length = ${msg.length} code = ${msg.code} ");  
-          //print("content = ${msg.data}");     
-        
+
+          print("received msg : length = ${msg.length} code = ${msg.code} uuid = ${msg.uuid}");
+
+          if(_receivedMsgCache.get(msg.uuid) != null){
+            continue;
+          }
+          _receivedMsgCache.put(msg.uuid, msg);  
+          //print("content = ${msg.data}");   
+          
           _handleMsg(msg);
         }//end for each
       },
       onDone: (){
         print("on close socket");
-        closeSocket();
+        onCloseSocket();
       },
       onError: (e){
         print("onError : ${e.toString()}");
@@ -213,7 +240,7 @@ class IMClient{
     return resultMsgList;
   }
 
-  void closeSocket(){
+  void onCloseSocket(){
     _netStatus = NetStatus.offline;
   }
 
@@ -226,11 +253,43 @@ class IMClient{
       //_socket.write(sendBytes);
       _socket.add(sendBytes);
       _socket.flush();
+
+      _lastSockWriteTime = TimeUtil.getNowMilliseconds();
+
+      if(msg.needResend()){//此消息需要做超时重发
+        //todo 启动定时任务
+        _shouldResendMsgs[msg.uuid] = msg;
+        _resendMsgTask(msg.uuid);
+      }
     }else if(_netStatus == NetStatus.connecting){
       _waitSendMsgs.add(msg);
     }else if(_netStatus == NetStatus.offline){
       _waitSendMsgs.add(msg);
       connectServer();
+    }
+  }
+
+  void _resendMsgTask(int uuid){
+    final Msg msg = _shouldResendMsgs[uuid];
+    if(msg == null){
+      return;
+    }
+
+    //重新发送
+    msg.sendTimes++;
+
+    if(msg.sendTimes > MAX_RETRY_TIMES){//超过了最大重试次数
+      print("消息${msg.uuid} 超过最大重试次数了 不再重发!");
+
+      _shouldResendMsgs.remove(uuid);
+      //错误回调
+      if(msg.getCallback() != null){
+        msg.getCallback().onSendError(msg);
+      }
+    }else{//重新发送
+      Future.delayed(Duration(seconds: RESEND_TIME_OUT)).then((v){
+        sendMsg(msg);
+      });
     }
   }
 
@@ -261,7 +320,7 @@ class IMClient{
 
   void _sendModel(Codec model){
     Msg msg = Msg.buildMsg(model.getCode() ,model);
-    print("msg = ${msg.length}  ${msg.code}");
+    print("msg = ${msg.length}  ${msg.code} uuid = ${msg.uuid}");
     sendMsg(msg);
   }
 
@@ -286,6 +345,25 @@ class IMClient{
     _sendModel(autoLoginReq);
   }
 
+  // 发送ack已接收报文
+  void _sendRecipeAckMsg(int uuid){
+    RecipeAck ack = new RecipeAck();
+    ack.uuid = uuid;
+    print("send ack uuid = ${ack.uuid}");
+    _sendModel(ack);
+
+
+    RecipeHello testRecipe = new RecipeHello();
+    testRecipe.content = "你好啊  我是Andoird客户端  如果你不理我 我会多次重发的";
+    testRecipe.setCallback(new MsgSendCallbackDefault());
+  }
+
+  // 接收到ack的操作
+  void _handleRecipeAck(int ackUuid){
+    print("接到$ackUuid 应答 可以不重发了");
+    _shouldResendMsgs.remove(ackUuid);
+  }
+
   //处理消息
   void _handleMsg(Msg msg){
     IMAction action;
@@ -301,6 +379,14 @@ class IMClient{
         break;
       case Codes.CODE_FRIEND_LIST_RESP://好友列表
         action = new GetFriendListAction();
+        break;
+      case Codes.CODE_RECIPE_HELLO:
+        _sendRecipeAckMsg(msg.uuid);
+        break;
+      case Codes.CODE_RECIPE_ACK://应答ack
+        RecipeAck ack = new RecipeAck();
+        ack.decode(msg.data);
+        _handleRecipeAck(ack.uuid);
         break;
     }//end switch
 
@@ -318,3 +404,11 @@ class IMClient{
   }
 
 }//end class
+
+
+class MsgSendCallbackDefault extends SendCallback{
+  @override
+  void onSendError(Codec msg) {
+    print("重发了很多次了 都没响应  算了 不发了");
+  }
+}
