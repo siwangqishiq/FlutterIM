@@ -10,20 +10,24 @@ class Msg extends Codec {
   int code;
   Uint8List data;
 
+  bool resend = false;
+
   Msg();
 
-  static Msg buildMsg(int code, Codec data){
+  static Msg buildMsg(int code, Codec data) {
     final Msg msg = new Msg();
-    
+
     msg.code = code;
     msg.uuid = GenUtil.genUuid();
+    msg.length = 4 + 4 + 8;
 
-    msg.length = 4 + 4 + 8; 
-    if(data != null){
+    msg.resend = data.needResend();
+
+    if (data != null) {
       Uint8List dataBytes = data.encode();
       msg.data = dataBytes;
-            
-      if(msg.data != null){
+
+      if (msg.data != null) {
         msg.length += msg.data.length;
       }
     }
@@ -39,7 +43,7 @@ class Msg extends Codec {
     code = readInt32(rawData);
 
     data = rawData.sublist(4 + 4 + 8);
-    
+
     return getReadIndex();
   }
 
@@ -53,6 +57,6 @@ class Msg extends Codec {
 
     result.add(data);
 
-    return Uint8List.fromList(result.expand((x)=>x).toList());
+    return Uint8List.fromList(result.expand((x) => x).toList());
   }
-}//end class
+} //end class

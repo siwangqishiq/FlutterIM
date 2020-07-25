@@ -17,7 +17,7 @@ void main() async {
   runApp(MyApp());
 }
 
-void unitTest(){
+void unitTest() {
   // for(int i=0 ;i < 100;i++){
   //   print(GenUtil.get16Uuid());
   // }
@@ -33,15 +33,16 @@ void unitTest(){
 
   // print("LruCache ---> ${cache.get(1)}");
 
-  int u = GenUtil.genUuid();
-  print("GenUtil ---> $u");
+  // int u = GenUtil.genUuid();
+  // print("GenUtil ---> $u");
 }
 
-void appInit() async{
+void appInit() async {
   await Account.loadAccount();
 
   print("Account isLogin = ${Account.isLogin()}");
-  if(Account.isLogin()){//自动登录
+  if (Account.isLogin()) {
+    //自动登录
     IMClient.getInstance().autoLogin();
   }
 }
@@ -50,7 +51,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       //home: MyHomePage(title: '客户端'),
-      home: Account.isLogin()?MainPage():LoginPage(),
+      home: Account.isLogin() ? MainPage() : LoginPage(),
     );
   }
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:imclient/core/IMClient.dart';
 import 'package:imclient/model/Msg.dart';
@@ -6,32 +5,33 @@ import 'package:imclient/model/Person.dart';
 import 'package:imclient/core/Codes.dart';
 import 'package:imclient/page/MainPage.dart';
 import 'package:imclient/util/TextUtil.dart';
-import 'package:fluttertoast/fluttertoast.dart'; 
+import 'package:fluttertoast/fluttertoast.dart';
 
 //
-class LoginPage extends StatefulWidget{
+class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _LoginPageState();
 }
 
 //
-class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallback{
+class _LoginPageState extends State<LoginPage>
+    with ClientCallback, AuthCallback {
   String _statusContent = "未连接";
 
   String _account;
   String _pwd;
 
-  bool _loginBtnEnable = false;//提交按钮是否可用
+  bool _loginBtnEnable = false; //提交按钮是否可用
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     IMClient.getInstance().addListener(this);
     IMClient.getInstance().addAuthCallback(this);
   }
 
   @override
-  void dispose(){
+  void dispose() {
     IMClient.getInstance().removeListener(this);
     IMClient.getInstance().clearAuthCallback();
     super.dispose();
@@ -40,69 +40,64 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("登录"),
-      ),
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              maxLines: 1,
-              
-              decoration: InputDecoration(
-                labelText: "用户名",
-                hintText: "输入用户名"
-              ),
-              onChanged: (text) {//内容改变的回调
-                _account = text;
-                _onInputTextChange();
-              },
-            ),
-
-            TextField(
-              maxLines: 1,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: "密码",
-                hintText: "输入登录密码",
-              ),
-              onChanged: (inputPwd) {//内容改变的回调
-                _pwd = inputPwd;
-                _onInputTextChange();
-              }
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            ButtonTheme(
-              minWidth:double.infinity,
-              child: RaisedButton(
-                onPressed: _loginBtnEnable?_onClickLoginButton:null,
-                textColor: Colors.white,
-                color: Colors.blue,
-                child:Text("登录"),
-              )
-            )
-          ],
+        appBar: AppBar(
+          title: Text("登录"),
         ),
-      )
-      
-      
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //   },
-      //   child: Icon(Icons.add),
-      // ),
-    );
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                maxLines: 1,
+                decoration:
+                    InputDecoration(labelText: "用户名", hintText: "输入用户名"),
+                onChanged: (text) {
+                  //内容改变的回调
+                  _account = text;
+                  _onInputTextChange();
+                },
+              ),
+              TextField(
+                  maxLines: 1,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "密码",
+                    hintText: "输入登录密码",
+                  ),
+                  onChanged: (inputPwd) {
+                    //内容改变的回调
+                    _pwd = inputPwd;
+                    _onInputTextChange();
+                  }),
+              SizedBox(
+                height: 15,
+              ),
+              ButtonTheme(
+                  minWidth: double.infinity,
+                  child: RaisedButton(
+                    onPressed: _loginBtnEnable ? _onClickLoginButton : null,
+                    textColor: Colors.white,
+                    color: Colors.blue,
+                    child: Text("登录"),
+                  ))
+            ],
+          ),
+        )
+
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //   },
+        //   child: Icon(Icons.add),
+        // ),
+        );
   }
 
   //输入内容改变  联动修改提交按钮状态
-  void _onInputTextChange(){
+  void _onInputTextChange() {
     //print("accout = $_account  pwd = $_pwd");
     bool enbaleSubmit = !TextUtil.isEmpty(_account) && !TextUtil.isEmpty(_pwd);
 
-    if(enbaleSubmit != _loginBtnEnable){
+    if (enbaleSubmit != _loginBtnEnable) {
       setState(() {
         _loginBtnEnable = enbaleSubmit;
       });
@@ -110,15 +105,15 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
   }
 
   //点击登录按钮
-  void _onClickLoginButton(){
+  void _onClickLoginButton() {
     print("accout = $_account  pwd = $_pwd");
-    IMClient.getInstance().auth(_account , _pwd);
+    IMClient.getInstance().auth(_account, _pwd);
   }
 
   @override
   void onNetStatusChange(NetStatus oldStatus, NetStatus newStatus) {
     String content;
-    switch(newStatus){
+    switch (newStatus) {
       case NetStatus.offline:
         content = "未连接";
         break;
@@ -128,17 +123,17 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
       case NetStatus.online:
         content = "已连接";
         break;
-    }//end switch
+    } //end switch
 
     print("content : $content");
     setState(() {
       _statusContent = content;
     });
   }
-  
+
   @override
   void onReceivedMsg(Msg msg) {
-    if(msg.code == Codes.CODE_PERSON_RESP){
+    if (msg.code == Codes.CODE_PERSON_RESP) {
       PesonResp pesonResp = PesonResp();
       pesonResp.decode(msg.data);
 
@@ -149,12 +144,11 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
     }
   }
 
-  void _skipToMain() async{
+  void _skipToMain() async {
     await Navigator.of(context).pop();
 
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (BuildContext context) => MainPage()
-    ));
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) => MainPage()));
   }
 
   @override
@@ -166,7 +160,7 @@ class _LoginPageState extends State<LoginPage> with ClientCallback , AuthCallbac
   @override
   void onAuthSuccess(String token, String account, int uid) {
     print("success login! token = $token , accout = $account uid=$uid");
+
     _skipToMain();
   }
-
-}//
+} //
