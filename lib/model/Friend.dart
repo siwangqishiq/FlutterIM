@@ -2,6 +2,7 @@
 import 'dart:typed_data';
 
 import 'package:imclient/model/Codec.dart';
+import 'package:imclient/util/TextUtil.dart';
 
 ///
 ///好友数据列表
@@ -43,6 +44,11 @@ class Friend extends Codec{
   String nick;
   int age;
   String desc;
+
+  //显示名字
+  String displayName(){
+    return TextUtil.isEmpty(nick)?account:nick;
+  }
 
   @override
   int decode(Uint8List rawData) {

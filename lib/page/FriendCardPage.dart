@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/Msg.dart';
 import 'package:imclient/core/IMClient.dart';
+import 'package:imclient/page/MessagePage.dart';
 
 import 'BaseState.dart';
 
@@ -33,7 +34,7 @@ class _FriendCardPageState extends BaseState<FriendCardPage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("${friend.nick}"),
+        title: Text("${friend.displayName()}"),
       ),
       body: Column(
         children: <Widget>[
@@ -77,7 +78,12 @@ class _FriendCardPageState extends BaseState<FriendCardPage>{
               child:Text("发送消息",style: TextStyle(color:Colors.white)),
               color: Colors.blue,
               minWidth: double.infinity,
-              onPressed: (){
+              onPressed: (){ //点击进入单聊
+                Navigator.of(context).pop();
+
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => P2PMessagePage(friend)
+                ));
               },
             )
           ),

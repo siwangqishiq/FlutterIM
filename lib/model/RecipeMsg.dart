@@ -39,5 +39,5 @@ abstract class RecipeMsg extends Codec{
 
   //子类实现  解码消息体
   int decodeRecipeMsgBody(Uint8List rawData);
-
+  
 }//end class

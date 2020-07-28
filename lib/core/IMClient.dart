@@ -375,7 +375,12 @@ class IMClient {
   // 接收到ack的操作
   void _handleRecipeAck(int ackUuid) {
     print("接到$ackUuid 应答 可以不重发了");
+    
+    if(_shouldResendMsgs[ackUuid] != null && _shouldResendMsgs[ackUuid].getCallback() != null){
+      _shouldResendMsgs[ackUuid].getCallback().onSendSuccess(_shouldResendMsgs[ackUuid]);
+    }
     _shouldResendMsgs.remove(ackUuid);
+    
   }
 
   //处理消息
@@ -419,8 +424,14 @@ class IMClient {
 } //end class
 
 class MsgSendCallbackDefault extends SendCallback {
+
   @override
   void onSendError(Codec msg) {
     print("重发了很多次了 都没响应  算了 不发了");
+  }
+
+  @override
+  void onSendSuccess(Codec msg) {
+    print("成功接收回馈  发送成功");
   }
 }

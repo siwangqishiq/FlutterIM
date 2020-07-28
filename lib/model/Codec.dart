@@ -69,6 +69,18 @@ abstract class Codec {
     return Uint8List.fromList(result.expand((x)=>x).toList());
   }
 
+  int readInt8(Uint8List bytes){
+    int result = bytes.sublist(_readIndex).buffer.asInt8List()[0];
+    _readIndex += 1;
+    return result;
+  }
+
+  Uint8List writeInt8(int value){
+    ByteData data = ByteData(1);
+    data.setInt8(0, value);
+    return data.buffer.asUint8List();
+  }
+
   int readInt32(Uint8List bytes){
     int result = bytes.sublist(_readIndex).buffer.asInt32List()[0];
     _readIndex += 4;
@@ -142,6 +154,9 @@ abstract class IGenListItem <T extends Codec>{
 
 //发送消息时 产生的事件回调
 abstract class SendCallback{
+  //远端成功接收
+  void onSendSuccess(Codec msg);
+
   //重试超过指定次数仍然无回应 则报错 回调
   void onSendError(Codec msg);
 }
