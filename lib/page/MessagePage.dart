@@ -35,7 +35,33 @@ class P2PMessageState extends State<P2PMessagePage>{
         appBar: AppBar(
           title: Text(_friend.displayName()),
         ),
-        body: Text("P2P Message"),
+        body: Column(
+          children: [
+            Expanded(
+              child: Text("列表"),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex:1,
+                  child: TextField(
+                    obscureText: false,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex:2,
+                  child: RaisedButton(
+                    child: Text("发送"),
+                    onPressed: (){},
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       );
   }
 }

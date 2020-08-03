@@ -5,6 +5,8 @@ import 'package:imclient/core/Codes.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/util/GenUtil.dart';
 import 'package:imclient/util/TimeUtil.dart';
+import 'package:imclient/model/Login.dart';
+import 'package:imclient/model/AuthBaseBean.dart';
 
 //会话类型
 enum SessionType {
@@ -154,3 +156,30 @@ class IMMessage extends Codec {
     return 0;
   }
 } //end class
+
+
+//发送IM消息packet
+class SendIMMessagePacket extends AuthBaseBean{
+  IMMessage imMessage;
+  
+  SendIMMessagePacket() : super(Account.getToken());
+
+  @override
+  int decodeModel(Uint8List rawData) {
+    return getReadIndex();
+  }
+
+  @override
+  Uint8List encodeModel(List<Uint8List> result) {
+    Uint8List imMessageUint8List = imMessage.encode();
+    result.add(imMessageUint8List);
+    return imMessageUint8List;
+  }
+
+  @override
+  int getCode() {
+    return Codes.CODE_IMMESSAGE_SEND;
+  }
+}//end class
+
+
