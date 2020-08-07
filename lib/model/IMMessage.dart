@@ -169,6 +169,11 @@ class SendIMMessagePacket extends AuthBaseBean{
     return getReadIndex();
   }
 
+  //是否有超时重发确认机制  
+  bool needResend() {
+    return true;
+  }
+
   @override
   Uint8List encodeModel(List<Uint8List> result) {
     Uint8List imMessageUint8List = imMessage.encode();

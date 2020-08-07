@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imclient/model/Friend.dart';
 import 'package:imclient/model/IMMessage.dart';
+import 'package:imclient/util/TextUtil.dart';
 
 class P2PMessagePage extends StatefulWidget{
   final Friend _friend;
@@ -43,7 +44,7 @@ class P2PMessageState extends State<P2PMessagePage>{
             Row(
               children: [
                 Expanded(
-                  flex:1,
+                  flex:5,
                   child: TextField(
                     obscureText: false,
                     decoration: InputDecoration(
@@ -52,10 +53,12 @@ class P2PMessageState extends State<P2PMessagePage>{
                   ),
                 ),
                 Expanded(
-                  flex:2,
+                  flex:1,
                   child: RaisedButton(
                     child: Text("发送"),
-                    onPressed: (){},
+                    onPressed: (){
+
+                    },
                   ),
                 ),
               ],
@@ -64,4 +67,14 @@ class P2PMessageState extends State<P2PMessagePage>{
         ),
       );
   }
-}
+
+  //发送文本消息
+  void sendTextIMMessage(String content){
+    if(TextUtil.isEmpty(content))
+      return;
+    
+    IMMessage imMsg = IMMessage.createTextIMMessage(SessionType.P2P, _friend.uid, content);
+    
+  }
+
+}//end class

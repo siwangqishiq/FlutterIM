@@ -9,6 +9,7 @@ import 'package:imclient/im/LoginAction.dart';
 import 'package:imclient/im/LoginOutAction.dart';
 import 'package:imclient/model/Codec.dart';
 import 'package:imclient/model/Friend.dart';
+import 'package:imclient/model/IMMessage.dart';
 import 'package:imclient/model/RecipeAck.dart';
 import 'package:imclient/model/bytebuf.dart';
 import 'package:imclient/model/Msg.dart';
@@ -381,6 +382,13 @@ class IMClient {
     }
     _shouldResendMsgs.remove(ackUuid);
     
+  }
+
+  void sendIMMessage(IMMessage msg){
+    SendIMMessagePacket packet = new SendIMMessagePacket();
+    packet.imMessage = msg;
+    
+    _sendModel(packet);
   }
 
   //处理消息
